@@ -13,7 +13,8 @@ PROCESSED_DATA_DIR = DATA_DIR / "processed"
 EXTERNAL_DATA_DIR = DATA_DIR / "external"
 
 # Modèles
-MODELS_DIR = SRC_DIR / "models/trained"
+MODELS_DIR = PROCESSED_DATA_DIR / "models" # SRC_DIR / "models/trained"
+
 TEMP_DIR = Path(os.environ.get("TEMP_DIR", "/tmp/cats_dogs"))
 
 # Configuration du modèle
@@ -27,7 +28,7 @@ MODEL_CONFIG = {
 # Configuration API
 API_CONFIG = {
     "host": "127.0.0.1",
-    "port": 8000,
+    "port": 8001,
     "token": os.environ.get("API_TOKEN", "?C@TS&D0GS!"),
     "model_path": MODELS_DIR / "cats_dogs_model.keras",
 }
