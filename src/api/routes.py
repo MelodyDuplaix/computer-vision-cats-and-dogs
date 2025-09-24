@@ -6,9 +6,6 @@ from datetime import datetime
 import sys
 from pathlib import Path
 import time
-import logging
-
-logging.basicConfig(level=logging.DEBUG)
 
 # Ajouter le répertoire racine au path
 ROOT_DIR = Path(__file__).parent.parent.parent
@@ -17,7 +14,7 @@ sys.path.insert(0, str(ROOT_DIR))
 from .auth import verify_token
 from src.models.predictor import CatDogPredictor
 from src.monitoring.metrics import time_inference
-from src.utils.database import get_db_connection, close_db_connection
+from src.utils.database import get_db_connection
 
 # Configuration des templates
 TEMPLATES_DIR = ROOT_DIR / "src" / "web" / "templates"
@@ -112,8 +109,8 @@ async def submit_feedback(
         with get_db_connection() as conn:
             cursor = conn.cursor()
             cursor.execute('''
-                INSERT INTO feedbacks (log_id, feedback, timestamp, predict_result, input_image)
-                VALUES (?, ?, ?, ?, ?)
+                INSERT INTO feedbacks (log_id, feedback, timestamp, predict_result, input_image) 
+                VALUES (%s, %s, %s, %s, %s)
             ''', (log_id, feedback, timestamp, predict_result, image_bytes))
             conn.commit()
         return {"detail": "Feedback soumis avec succès."}
