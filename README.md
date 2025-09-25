@@ -26,6 +26,7 @@ Il est composé de :
 - Une application web minimaliste (templates Jinja2).
 - Des tests automatisés minimalistes (pytest).
 - Un pipeline CI/CD minimaliste (Github Action).
+- Un système de logging des inférences et de collecte de feedback utilisateur via une base de données PostgreSQL.
 
 ## 🏗️ Architecture de l'application
 
@@ -176,6 +177,33 @@ python scripts/run_api.py
 
 ![Web APP](/docs/img/web.png "Application web du projet")
 
-## 📄 Licence
+## Monitoring (Grafana)
+
+Pour visualiser les métriques de l'application en temps réel (temps d'inférence, feedbacks, etc.), un dashboard Grafana est mis à disposition.
+
+### Configuration du Dashboard
+
+La configuration du dashboard est disponible via un fichier JSON, dans `config/Cats and Dogs app Dashboard.json`. Vous pouvez l'importer dans votre instance Grafana pour visualiser les métriques.
+
+### Mise en Place
+
+#### Installation (installation de Grafana en local)
+
+1.  **Installer Grafana** : Suivez les instructions officielles pour votre système d'exploitation.
+2.  **Démarrer Grafana** : Lancez le serveur Grafana (il sera accessible sur `http://localhost:3000`, login: `admin`, pass: `admin`).
+3.  **Ajouter la source de données** :
+    *   Allez dans `Connections` -> `Data sources` -> `Add new data source`.
+    *   Choisissez `PostgreSQL`.
+    *   Configurez la connexion à votre base de données (même configuration que celles de l'API, que vous avez configuré dans le fichier `.env`).
+4.  **Importer le Dashboard** :
+    *   Allez dans `Dashboards` -> `New` -> `Import`.
+    *   Uploadez le fichier `dashboard.json` fourni dans le projet.
+    *   Sélectionnez la source de données PostgreSQL que vous venez de créer.
+
+### Aperçu du Dashboard
+
+![Dashboard Grafana](/docs/img/Grafana-dashboard.png)
+
+## Licence
 
 MIT - voir LICENSE pour plus de détails.
