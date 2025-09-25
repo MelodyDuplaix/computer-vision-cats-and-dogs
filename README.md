@@ -33,7 +33,6 @@ Il est composé de :
 graph TB
     subgraph "Data Layer"
         A[📁 Raw Data<br/>data/raw/] --> B[📁 Processed Data<br/>data/processed/]
-        C[📁 External Data<br/>data/external/]
     end
     
     subgraph "ML Pipeline"
@@ -46,13 +45,14 @@ graph TB
         G[🚀 FastAPI Server<br/>src/api/]
         H[🌐 Web Interface<br/>src/web/<br/>Jinja2 Templates]
         I[🔧 Utils<br/>src/utils/]
-        R[🎯 Prediction Endpoint<br/>/api/predict]
+        R[🎯 API Endpoints<br/>/api/predict<br/>/api/feedback]
     end
     
     subgraph "DevOps & Infrastructure"
         K[⚙️ CI/CD<br/>.github/workflows/]
         L[📋 Scripts<br/>scripts/]
         M[🧪 Tests<br/>tests/<br/>pytest]
+        S[🐘 PostgreSQL DB<br/>Logs & Feedbacks]
     end
     
     subgraph "Configuration & Documentation"
@@ -61,19 +61,27 @@ graph TB
         Q[📦 Requirements<br/>requirements/]    
     end
     
-    %% Data Flow
+    subgraph "Monitoring & MLOps"
+        F[📈 Monitoring Scripts<br/>src/monitoring/]
+        T[📊 Grafana<br/>Dashboard & Alerting]
+    end
+
+    %% Data & Model Flow
     B --> E
     E --> D
     D --> G
+    
+    %% Application Flow
     G --> H
     G --> R
+    H -- "User sends image" --> R
+    R -- "Prediction" --> H
+    H -- "User gives feedback" --> R
     
-    %% API Routes
-    %%G -.->|/api/predict| R[🎯 Prediction<br/>Endpoint]
-    
-    %% DevOps Integration
-    M --> K
-    L --> G
+    %% Monitoring & Feedback Loop
+    R -- "Logs inference & feedback" --> S
+    S -- "Data source" --> T
+    T -- "Alerts (e.g., email)" --> U((👤 Developper))
     
     %% Configuration
     N --> G
@@ -90,12 +98,15 @@ graph TB
     classDef appClass fill:#e8f5e8,stroke:#1b5e20,stroke-width:2px
     classDef devopsClass fill:#fff3e0,stroke:#e65100,stroke-width:2px
     classDef configClass fill:#fafafa,stroke:#424242,stroke-width:2px
+    classDef monitoringClass fill:#ede7f6,stroke:#512da8,stroke-width:2px
     
     class A,B,C dataClass
     class D,E,F mlClass
     class G,H,I,R appClass
     class K,L,M devopsClass
     class N,O,Q configClass
+    class S,T,U monitoringClass
+    class F monitoringClass
 ```
 
 ## 📁 Structure du projet
