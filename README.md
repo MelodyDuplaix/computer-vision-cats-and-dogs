@@ -26,6 +26,7 @@ Il est composé de :
 - Une application web minimaliste (templates Jinja2).
 - Des tests automatisés minimalistes (pytest).
 - Un pipeline CI/CD minimaliste (Github Action).
+- Un système de logging des inférences et de collecte de feedback utilisateur via une base de données PostgreSQL.
 
 ## 🏗️ Architecture de l'application
 
@@ -33,7 +34,6 @@ Il est composé de :
 graph TB
     subgraph "Data Layer"
         A[📁 Raw Data<br/>data/raw/] --> B[📁 Processed Data<br/>data/processed/]
-        C[📁 External Data<br/>data/external/]
     end
     
     subgraph "ML Pipeline"
@@ -46,13 +46,14 @@ graph TB
         G[🚀 FastAPI Server<br/>src/api/]
         H[🌐 Web Interface<br/>src/web/<br/>Jinja2 Templates]
         I[🔧 Utils<br/>src/utils/]
-        R[🎯 Prediction Endpoint<br/>/api/predict]
+        R[🎯 API Endpoints<br/>/api/predict<br/>/api/feedback]
     end
     
     subgraph "DevOps & Infrastructure"
         K[⚙️ CI/CD<br/>.github/workflows/]
         L[📋 Scripts<br/>scripts/]
         M[🧪 Tests<br/>tests/<br/>pytest]
+        S[🐘 PostgreSQL DB<br/>Logs & Feedbacks]
     end
     
     subgraph "Configuration & Documentation"
@@ -61,19 +62,27 @@ graph TB
         Q[📦 Requirements<br/>requirements/]    
     end
     
-    %% Data Flow
+    subgraph "Monitoring & MLOps"
+        F[📈 Monitoring Scripts<br/>src/monitoring/]
+        T[📊 Grafana<br/>Dashboard & Alerting]
+    end
+
+    %% Data & Model Flow
     B --> E
     E --> D
     D --> G
+    
+    %% Application Flow
     G --> H
     G --> R
+    H -- "User sends image" --> R
+    R -- "Prediction" --> H
+    H -- "User gives feedback" --> R
     
-    %% API Routes
-    %%G -.->|/api/predict| R[🎯 Prediction<br/>Endpoint]
-    
-    %% DevOps Integration
-    M --> K
-    L --> G
+    %% Monitoring & Feedback Loop
+    R -- "Logs inference & feedback" --> S
+    S -- "Data source" --> T
+    T -- "Alerts (e.g., email)" --> U((👤 Developper))
     
     %% Configuration
     N --> G
@@ -90,12 +99,15 @@ graph TB
     classDef appClass fill:#e8f5e8,stroke:#1b5e20,stroke-width:2px
     classDef devopsClass fill:#fff3e0,stroke:#e65100,stroke-width:2px
     classDef configClass fill:#fafafa,stroke:#424242,stroke-width:2px
+    classDef monitoringClass fill:#ede7f6,stroke:#512da8,stroke-width:2px
     
     class A,B,C dataClass
     class D,E,F mlClass
     class G,H,I,R appClass
     class K,L,M devopsClass
     class N,O,Q configClass
+    class S,T,U monitoringClass
+    class F monitoringClass
 ```
 
 ## 📁 Structure du projet
@@ -165,6 +177,48 @@ python scripts/run_api.py
 
 ![Web APP](/docs/img/web.png "Application web du projet")
 
-## 📄 Licence
+## Monitoring (Grafana)
+
+Pour visualiser les métriques de l'application en temps réel (temps d'inférence, feedbacks, etc.), un dashboard Grafana est mis à disposition.
+
+### Configuration du Dashboard
+
+La configuration du dashboard est disponible via un fichier JSON, dans `config/Cats and Dogs app Dashboard.json`. Vous pouvez l'importer dans votre instance Grafana pour visualiser les métriques.
+
+### Mise en Place
+
+#### Installation (installation de Grafana en local)
+
+1.  **Installer Grafana** : Suivez les instructions officielles pour votre système d'exploitation.
+2.  **Démarrer Grafana** : Lancez le serveur Grafana (il sera accessible sur `http://localhost:3000`, login: `admin`, pass: `admin`).
+3.  **Ajouter la source de données** :
+    *   Allez dans `Connections` -> `Data sources` -> `Add new data source`.
+    *   Choisissez `PostgreSQL`.
+    *   Configurez la connexion à votre base de données (même configuration que celles de l'API, que vous avez configuré dans le fichier `.env`).
+4.  **Importer le Dashboard** :
+    *   Allez dans `Dashboards` -> `New` -> `Import`.
+    *   Uploadez le fichier `dashboard.json` fourni dans le projet.
+    *   Sélectionnez la source de données PostgreSQL que vous venez de créer.
+
+### Aperçu du Dashboard
+
+![Dashboard Grafana](/docs/img/Grafana-dashboard.png)
+
+### Alerting et Ré-entraînement du Modèle
+
+Pour assurer une amélioration continue, un système d'alerte et un processus de ré-entraînement sont prévus :
+
+1.  **Alerte de Précision** : Une alerte par e-mail est configurée dans Grafana. Elle se déclenche si le **taux de précision**, calculé à partir des retours utilisateurs, descend en dessous de 85%.
+
+2.  **Processus de Ré-entraînement** : Si une alerte est reçue, le processus de ré-entraînement est mis en place :
+    *   **Vérification** : Analyse manuelle des feedbacks ayant causé la baisse de précision pour valider leur pertinence.
+    *   **Annotation** : Les images des feedbacks jugés "incorrects" par les utilisateurs sont vérifiées et correctement annotées. Les images de feedbacks "corrects" sont également vérifiées pour s'assurer de leur validité.
+    *   **Création d'un nouveau jeu de données** : Un nouveau jeu de données est constitué à partir de ces images annotées.
+    *   **Ré-entraînement** : Le modèle est ré-entraîné en intégrant ce nouveau jeu de données validé.
+    *   **Nettoyage (RGPD)** : Conformément à notre politique de confidentialité, une fois les images utilisées pour le ré-entraînement, elles sont définitivement supprimées de la base de données.
+
+Ce cycle permet au modèle de s'améliorer au fil du temps en apprenant de ses erreurs, tout en respectant la vie privée des utilisateurs.
+
+## Licence
 
 MIT - voir LICENSE pour plus de détails.
