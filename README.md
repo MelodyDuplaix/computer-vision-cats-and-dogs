@@ -204,6 +204,21 @@ La configuration du dashboard est disponible via un fichier JSON, dans `config/C
 
 ![Dashboard Grafana](/docs/img/Grafana-dashboard.png)
 
+### Alerting et Ré-entraînement du Modèle
+
+Pour assurer une amélioration continue, un système d'alerte et un processus de ré-entraînement sont prévus :
+
+1.  **Alerte de Précision** : Une alerte par e-mail est configurée dans Grafana. Elle se déclenche si le **taux de précision**, calculé à partir des retours utilisateurs, descend en dessous de 85%.
+
+2.  **Processus de Ré-entraînement** : Si une alerte est reçue, le processus de ré-entraînement est mis en place :
+    *   **Vérification** : Analyse manuelle des feedbacks ayant causé la baisse de précision pour valider leur pertinence.
+    *   **Annotation** : Les images des feedbacks jugés "incorrects" par les utilisateurs sont vérifiées et correctement annotées. Les images de feedbacks "corrects" sont également vérifiées pour s'assurer de leur validité.
+    *   **Création d'un nouveau jeu de données** : Un nouveau jeu de données est constitué à partir de ces images annotées.
+    *   **Ré-entraînement** : Le modèle est ré-entraîné en intégrant ce nouveau jeu de données validé.
+    *   **Nettoyage (RGPD)** : Conformément à notre politique de confidentialité, une fois les images utilisées pour le ré-entraînement, elles sont définitivement supprimées de la base de données.
+
+Ce cycle permet au modèle de s'améliorer au fil du temps en apprenant de ses erreurs, tout en respectant la vie privée des utilisateurs.
+
 ## Licence
 
 MIT - voir LICENSE pour plus de détails.
