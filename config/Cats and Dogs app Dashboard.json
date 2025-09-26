@@ -49,7 +49,6 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": null,
   "links": [],
   "panels": [
     {
@@ -405,7 +404,7 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "WITH binned_feedbacks AS (\r\n  SELECT\r\n    $__timeGroup(timestamp, $__interval) AS time,\r\n    COUNT(*) FILTER (WHERE feedback = true) AS corrects,\r\n    COUNT(*) AS total\r\n  FROM feedbacks\r\n  WHERE $__timeFilter(timestamp)\r\n  GROUP BY 1\r\n)\r\nSELECT\r\n  time,\r\n  SUM(corrects) OVER (ORDER BY time) * 100.0 / SUM(total) OVER (ORDER BY time) AS \"Précision cumulative (%)\"\r\nFROM binned_feedbacks\r\nORDER BY time;\r\n\r\n",
+          "rawSql": "WITH binned_feedbacks AS (\r\n  SELECT\r\n    timestamp AS time,\r\n    COUNT(*) FILTER (WHERE feedback = true) AS corrects,\r\n    COUNT(*) AS total\r\n  FROM feedbacks\r\n  WHERE $__timeFilter(timestamp)\r\n  GROUP BY 1\r\n)\r\nSELECT\r\n  time,\r\n  SUM(corrects) OVER (ORDER BY time) * 100.0 / SUM(total) OVER (ORDER BY time) AS \"Précision cumulative (%)\"\r\nFROM binned_feedbacks\r\nORDER BY time;",
           "refId": "A",
           "sql": {
             "columns": [
@@ -524,7 +523,7 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "WITH binned_feedbacks_by_class AS (\r\n  SELECT\r\n    $__timeGroup(timestamp, $__interval) AS time,\r\n    COUNT(*) FILTER (WHERE feedback = true AND predict_result = 'Cat') AS correct_cats,\r\n    COUNT(*) FILTER (WHERE predict_result = 'Cat') AS total_cats,\r\n    COUNT(*) FILTER (WHERE feedback = true AND predict_result = 'Dog') AS correct_dogs,\r\n    COUNT(*) FILTER (WHERE predict_result = 'Dog') AS total_dogs\r\n  FROM feedbacks\r\n  WHERE $__timeFilter(timestamp)\r\n  GROUP BY 1\r\n)\r\nSELECT\r\n  time,\r\n  SUM(correct_cats) OVER (ORDER BY time) * 100.0 / NULLIF(SUM(total_cats) OVER (ORDER BY time), 0) AS \"Précision cumulative 'Cat' (%)\",\r\n  SUM(correct_dogs) OVER (ORDER BY time) * 100.0 / NULLIF(SUM(total_dogs) OVER (ORDER BY time), 0) AS \"Précision cumulative 'Dog' (%)\"\r\nFROM binned_feedbacks_by_class\r\nORDER BY time;\r\n",
+          "rawSql": "WITH binned_feedbacks_by_class AS (\r\n  SELECT\r\n    timestamp AS time,\r\n    COUNT(*) FILTER (WHERE feedback = true AND predict_result = 'Cat') AS correct_cats,\r\n    COUNT(*) FILTER (WHERE predict_result = 'Cat') AS total_cats,\r\n    COUNT(*) FILTER (WHERE feedback = true AND predict_result = 'Dog') AS correct_dogs,\r\n    COUNT(*) FILTER (WHERE predict_result = 'Dog') AS total_dogs\r\n  FROM feedbacks\r\n  WHERE $__timeFilter(timestamp)\r\n  GROUP BY 1\r\n)\r\nSELECT\r\n  time,\r\n  SUM(correct_cats) OVER (ORDER BY time) * 100.0 / NULLIF(SUM(total_cats) OVER (ORDER BY time), 0) AS \"Précision cumulative 'Cat' (%)\",\r\n  SUM(correct_dogs) OVER (ORDER BY time) * 100.0 / NULLIF(SUM(total_dogs) OVER (ORDER BY time), 0) AS \"Précision cumulative 'Dog' (%)\"\r\nFROM binned_feedbacks_by_class\r\nORDER BY time;\r\n",
           "refId": "A",
           "sql": {
             "columns": [
@@ -549,7 +548,7 @@
           }
         }
       ],
-      "title": "Taux de précision selon la classe",
+      "title": "Taux de précision cumulé selon la classe",
       "transparent": true,
       "type": "timeseries"
     }
@@ -560,13 +559,14 @@
     "list": []
   },
   "time": {
-    "from": "2025-09-24T06:08:23.992Z",
-    "to": "2025-09-24T23:17:23.810Z"
+    "from": "2025-09-26T08:48:33.355Z",
+    "to": "2025-09-26T10:40:02.091Z"
   },
   "timepicker": {},
   "timezone": "browser",
   "title": "Cats and Dogs app Dashboard",
   "uid": "adzz6pc",
-  "version": 7,
-  "weekStart": ""
+  "version": 9,
+  "weekStart": "",
+  "id": null
 }
